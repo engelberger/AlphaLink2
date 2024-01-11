@@ -19,7 +19,6 @@ from .embedders import (
     TemplateAngleEmbedder,
     TemplatePairEmbedder,
     ExtraMSAEmbedder,
-    XLEmbedder,
 )
 from .evoformer import EvoformerStack, ExtraMSAStack
 from .auxillary_heads import AuxiliaryHeads
@@ -55,14 +54,6 @@ class AlphaFold(nn.Module):
         self.recycling_embedder = RecyclingEmbedder(
             **config["recycling_embedder"],
         )
-        self.xl_embedder = XLEmbedder(
-            **config["xl_embedder"],
-        )
-
-        self.xl_grouping_embedder = XLEmbedder(
-            **config["xl_embedder"],
-        )
-
         if config.template.enabled:
             self.template_angle_embedder = TemplateAngleEmbedder(
                 **template_config["template_angle_embedder"],
@@ -94,7 +85,6 @@ class AlphaFold(nn.Module):
         )
         self.evoformer = EvoformerStack(
             **config["evoformer_stack"],
-            use_flash_attn=self.globals.use_flash_attn,
         )
         self.structure_module = StructureModule(
             **config["structure_module"],
@@ -126,6 +116,11 @@ class AlphaFold(nn.Module):
         if (not getattr(self, "inference", False)):
             self.__make_input_float__()
         self.dtype = torch.bfloat16
+        return self
+    
+    def float(self):
+        super().float()
+        self.dtype = torch.float
         return self
 
     def alphafold_original_mode(self):
@@ -347,9 +342,6 @@ class AlphaFold(nn.Module):
             inf=self.inf,
         )
 
-
-        z += self.xl_embedder(feats["xl"] * 10) # increase signal
-
         m, z, s = self.evoformer(
             m,
             z,
@@ -424,8 +416,6 @@ class AlphaFold(nn.Module):
         return outputs, m_1_prev, z_prev, x_prev
 
     def forward(self, batch):
-
-        #print(torch.sum(batch["xl"] > 0).item() // 2)
 
         m_1_prev = batch.get("m_1_prev", None)
         z_prev = batch.get("z_prev", None)

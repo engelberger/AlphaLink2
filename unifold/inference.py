@@ -12,7 +12,7 @@ import pickle
 from unifold.config import model_config
 from unifold.modules.alphafold import AlphaFold
 from unifold.data import residue_constants, protein
-from unifold.dataset_inference import load_and_process, UnifoldDataset
+from unifold.dataset import load_and_process, UnifoldDataset
 from unicore.utils import (
     tensor_tree_map,
 )
@@ -47,7 +47,7 @@ def automatic_chunk_size(seq_len, device, is_bf16):
     return chunk_size, block_size
 
 def load_feature_for_one_target(
-    config, data_folder, crosslinks, seed=0, is_multimer=False, use_uniprot=False
+    config, data_folder, seed=0, is_multimer=False, use_uniprot=False
 ):
     if not is_multimer:
         uniprot_msa_dir = None
@@ -57,7 +57,7 @@ def load_feature_for_one_target(
 
     else:
         uniprot_msa_dir = data_folder
-        sequence_ids = open(os.path.join(data_folder, "chains.txt")).readline().split() # A B C?
+        sequence_ids = open(os.path.join(data_folder, "chains.txt")).readline().split()
     batch, _ = load_and_process(
         config=config.data,
         mode="predict",
@@ -69,17 +69,9 @@ def load_feature_for_one_target(
         monomer_feature_dir=data_folder,
         uniprot_msa_dir=uniprot_msa_dir,
         is_monomer=(not is_multimer),
-        crosslinks=crosslinks,
     )
     batch = UnifoldDataset.collater([batch])
     return batch
-
-MAX_TEMPLATE_HITS = 20
-RELAX_MAX_ITERATIONS = 0
-RELAX_ENERGY_TOLERANCE = 2.39
-RELAX_STIFFNESS = 10.0
-RELAX_EXCLUDE_RESIDUES = []
-RELAX_MAX_OUTER_ITERATIONS = 3
 
 
 def main(args):
@@ -126,7 +118,6 @@ def main(args):
         batch = load_feature_for_one_target(
             config,
             data_dir,
-            args.crosslinks,
             cur_seed,
             is_multimer=is_multimer,
             use_uniprot=args.use_uniprot,
@@ -219,7 +210,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name",
         type=str,
-        default="model_5_ptm_af2",
+        default="model_2",
     )
     parser.add_argument(
         "--param_path", type=str, default=None, help="Path to model parameters."
@@ -231,11 +222,6 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--data_dir",
-        type=str,
-        default="",
-    )
-    parser.add_argument(
-        "--crosslinks",
         type=str,
         default="",
     )
@@ -252,7 +238,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--times",
         type=int,
-        default=10,
+        default=3,
     )
     parser.add_argument(
         "--max_recycling_iters",
@@ -262,7 +248,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_ensembles",
         type=int,
-        default=1,
+        default=2,
     )
     parser.add_argument("--sample_templates", action="store_true")
     parser.add_argument("--use_uniprot", action="store_true")

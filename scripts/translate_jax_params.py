@@ -130,7 +130,7 @@ def assign(translation_dict, orig_weights):
 
 def import_jax_weights_(model, npz_path, version="model_1"):
     is_multimer = False
-    if version in ["multimer_af2", "multimer_5_af2"]:
+    if version in ["multimer_af2"]:
         is_multimer = True
     data = np.load(npz_path, allow_pickle=True)
     if 'arr_0' in data:
@@ -470,7 +470,7 @@ def import_jax_weights_(model, npz_path, version="model_1"):
         },
     }
 
-    no_temp = version in  ["model_3_af2", "model_4_af2", "model_5_af2", "multimer_5_af2"]
+    no_temp = version in  ["model_3_af2", "model_4_af2", "model_5_af2"]
 
     if no_temp:
         evo_dict = translations["evoformer"]
@@ -494,7 +494,6 @@ def import_jax_weights_(model, npz_path, version="model_1"):
         translations["evoformer"]["~_relative_encoding"]["position_activations"] = LinearParams(
             model.input_embedder.linear_relpos
         )
-        """
         for i in range(8):
             translations["evoformer"]["template_embedding"]["single_template_embedding"]["template_pair_embedding_{}".format(i)] = LinearParams(
                 model.template_pair_embedder.linear[i]
@@ -510,7 +509,6 @@ def import_jax_weights_(model, npz_path, version="model_1"):
             model.template_proj.output_linear
         )
         translations["evoformer"]["template_embedding"]["single_template_embedding"]["template_embedding_iteration"] = tps_blocks_params
-        """
     else:
         if not no_temp:
             translations["evoformer"]["template_embedding"]["single_template_embedding"]["embedding2d"] = LinearParams(

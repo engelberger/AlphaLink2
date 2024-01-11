@@ -216,4 +216,3 @@ def compute_multimer(gt_pdb, pred_pdb, entity, max_permutations=120):
         "gdt_ts": float(best_gdt_ts),
         "gdt_ha": float(best_gdt_ha),
     }
-

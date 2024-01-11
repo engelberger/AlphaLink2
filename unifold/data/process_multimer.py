@@ -112,7 +112,6 @@ def pair_and_merge(all_chain_features: MutableMapping[str, FeatureDict]) -> Feat
         pair_msa_sequences=pair_msa_sequences,
         max_templates=MAX_TEMPLATES,
     )
-
     np_example = process_final(np_example)
     return np_example
 

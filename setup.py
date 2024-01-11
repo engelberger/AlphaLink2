@@ -17,12 +17,13 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(
-    name="alphalink2",
-    version="1.0",
-    description="Modelling protein complexes with crosslinking mass spectrometry and deep learning",
-    author="Kolja Stahl",
+    name="unifold",
+    version="2.2.1",
+    description="An open-source platform for developing protein folding models beyond AlphaFold.",
+    author="DP Technology",
+    author_email="unifold@dp.tech",
     license="Apache License, Version 2.0",
-    url="https://github.com/Rappsilber-Laboratory/AlphaLink2",
+    url="https://github.com/dptech-corp/Uni-Fold",
     packages=find_packages(
         exclude=["scripts", "tests", "example_data", "docker", "benchmark", "img", "evaluation", "notebooks"]
     ),
